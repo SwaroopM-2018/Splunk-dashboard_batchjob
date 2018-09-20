@@ -1,0 +1,621 @@
+<form stylesheet="trafficlight.css" hideEdit="false" isVisible="true" onUnloadCancelJobs="true" script="common_control.js">
+  <label>BatchJob Performance Dashboard : iWarranty MBOI-ID ****</label>
+  <fieldset autoRun="true" submitButton="false">
+    <input type="dropdown" token="mboi_job" searchWhenChanged="true">
+      <label>Select Batch Job</label>
+      <choice value="PA63">PA63</choice>
+      <choice value="PPD8">PPD8</choice>
+      <default>PA63</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <html>
+        <h2>
+          <span>Select views: </span>
+          <span id="link-switcher-view">
+            <a href="#" class="btn-pill active" data-item="all">All</a>
+            <a href="#" class="btn-pill" data-item="snapshot">Snapshot</a>
+            <a href="#" class="btn-pill" data-item="historical">Historical</a>
+          </span>
+        </h2>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$historical$">
+      <html>
+        <h1 id="snapshot_section_title">Snapshots (last 4 hour)</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel id="image_overlay_panel" rejects="$historical$">
+      <title>PA63 File flow Status across IS layer</title>
+      <html>
+         <style>
+           .ingestion_pipeline {
+               position: relative;
+               width: 1200px;
+               height: 500px;
+           }
+           #image_overlay_panel .image{
+               background: transparent 50% 50% no-repeat url('/static/app/BatchDashboard/images/Splunk_new.png');
+               position:absolute;
+               top: 0px;
+               left: 0px;
+               width: inherit;
+               height: inherit;
+           }
+           .singleValue {
+               font-size: 2em;
+               font-weight: bold;
+           }
+           .singleValue .green {
+               font-size: 2em;
+               color: #00ff00;
+           }
+           .singleValue .red {
+               font-size: 6em;
+               color: #ff0000;
+           }
+           .singleValue .blue {
+               font-size: 4em;
+               color: #0000ff;
+           }
+           #image_overlay_panel #FR_ST_upstream {
+              position: absolute;
+              top: 128px;
+              left: 154px;
+           }
+           #image_overlay_panel #FR_SOA {
+              position: absolute;
+              top: 129px;
+              left: 435px;
+           }
+           #image_overlay_panel #FR_ST_downstream {
+              position: absolute;
+              top: 130px;
+              left: 726px;
+           }
+           #image_overlay_panel #TP_ST_upstream {
+              position: absolute;
+              top: 278px;
+              left: 435px;
+           }
+           #image_overlay_panel #TP_SOA {
+              position: absolute;
+              top: 277px;
+              left: 718px;
+           }
+           #image_overlay_panel #TP_ST_downstream {
+              position: absolute;
+              top: 277px;
+              left: 999px;
+           }
+
+         </style>
+               
+       <search id="FR_ST_upstream">
+         <query>host="swaroops-MacBook-Pro.local" "Total Records processed" 
+               | stats count as value 
+               | rangemap field=value green=0-50 blue=51-100 red=101-200 default=green
+         </query>
+         <earliest>-30d@d</earliest>
+         <latest>now</latest>
+       <preview>
+           <set token="FR_ST_upstreamval">$result.count$</set>
+           <set token="parsing_range">$result.range$</set>
+       </preview>
+       </search>
+        
+         <div class="ingestion_pipeline">
+             <div class="image"/>
+           
+             <div class="singleValue">
+              <div class="$parsing_range$" id="FR_ST_upstream">0</div>
+             </div>
+             <!--div class="singleValue" id="FR_ST_upstream">100</div-->
+             <div class="singleValue" id="FR_SOA">100</div>
+             <div class="singleValue" id="FR_ST_downstream">0</div>
+             <div class="singleValue" id="TP_ST_upstream">0</div>
+             <div class="singleValue" id="TP_SOA">100</div>
+             <div class="singleValue" id="TP_ST_downstream">0</div>
+         </div>
+       </html>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$historical$">
+      <table>
+        <title>KPI Value for ST Upstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "'PMIC1." OR "PA63:SFTP Process successful"| chart count(eval(searchmatch("'PMIC1."))) AS Input,count(eval(searchmatch("PA63:SFTP Process successful"))) AS Success | eval Throughput= ((Success/Input)*100)."%"|eval Fill_Ratio= (('Success' /1)*100)."%"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel rejects="$historical$">
+      <table>
+        <title>KPI Value for SOA</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "'PMIC1." OR "PA63:SFTP Process successful"| chart count(eval(searchmatch("'PMIC1."))) AS Input,count(eval(searchmatch("PA63:SFTP Process successful"))) AS Success | eval Throughput= ((Success/Input)*100)."%"|eval Fill_Ratio= (('Success' /1)*100)."%"</query>
+          <earliest>-10h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.map.center">(0,0)</option>
+        <option name="mapping.map.zoom">2</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.tileLayer.maxZoom">7</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">full</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel rejects="$historical$">
+      <table>
+        <title>KPI Value for ST Downstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "'PMIC1." OR "PA63:SFTP Process successful"| chart count(eval(searchmatch("'PMIC1."))) AS Input,count(eval(searchmatch("PA63:SFTP Process successful"))) AS Success | eval Throughput= ((Success/Input)*100)."%"|eval Fill_Ratio= (('Success' /1)*100)."%"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$historical$">
+      <single>
+        <title>File Status ST upstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" "Total Records processed" | stats count as value | rangemap field=value severe=1-399 low=0-0 elevated=400-699 none=700-999 default=none</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="field">value</option>
+        <option name="classField">range</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+        <option name="additionalClass">icon-only</option>
+      </single>
+    </panel>
+    <panel rejects="$historical$">
+      <single>
+        <title>File Status SOA</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" sourcetype ="PA63_demo3" "'PMIC1." OR "PA63:SFTP Process successful"| chart count(eval(searchmatch("'PMIC1."))) AS Input, count(eval(searchmatch("PA63:SFTP Process successful"))) as success   | eval Total=('success'+'Input')   | rangemap field=Total severe=0-0 low=2-2 elevated=1-1 none=700-999 default=none</query>
+          <earliest>-10h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="field">value</option>
+        <option name="classField">range</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+        <option name="additionalClass">icon-only</option>
+      </single>
+    </panel>
+    <panel rejects="$historical$">
+      <single>
+        <title>File Status ST downstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" "Total Records processed" | stats count as value | rangemap field=value severe=0-0 low=1-399 elevated=400-699 none=700-999 default=none</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="field">value</option>
+        <option name="classField">range</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+        <option name="additionalClass">icon-only</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$historical$">
+      <chart>
+        <title>SLA Status of ST Upstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" "PA63"</query>
+          <earliest>-1mon@mon</earliest>
+          <latest>@mon</latest>
+        </search>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.rangeValues">["0", "30", "70", "100"]</option>
+        <option name="charting.gaugeColors">[0x84E900, 0xFFE800, 0xBF3030]</option>
+      </chart>
+    </panel>
+    <panel rejects="$historical$">
+      <chart>
+        <title>SLA status of SOA</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3"  "iWarranty_PA63 service started" OR "PA63:SFTP Process successful" | transaction startswith="iWarranty_PA63 service started" endswith="PA63:SFTP Process successful" | table duration</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel rejects="$historical$">
+      <chart>
+        <title>SLA Status of ST downstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" sourcetype="PA63_demo3"</query>
+          <earliest>-4h@m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$snapshot$">
+      <input type="time" searchWhenChanged="true" token="time">
+        <label>Time Range:</label>
+        <default>
+          <earliestTime>-4h@m</earliestTime>
+          <latestTime>now</latestTime>
+        </default>
+      </input>
+      <html>
+        <h1 id="historical_section_title">Historical Charts</h1>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$snapshot$">
+      <title>Successful Transactions within time range</title>
+      <table>
+        <title>ST Upstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "GMAC InterfaceID  : PA63"| eval Time = strftime(_time, "%Y-%d-%m %H:%M:%S") | fields - _time | rex field=_raw "Info Desc:(?&lt;File_Name&gt;.*)is"   | table Time File_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel rejects="$snapshot$">
+      <title>Successful Transactions within time range</title>
+      <table>
+        <title>SOA</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "GMAC InterfaceID  : PA63"| eval Time = strftime(_time, "%Y-%d-%m %H:%M:%S") | fields - _time | rex field=_raw "Info Desc:(?&lt;File_Name&gt;.*)is"   | table Time File_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel rejects="$snapshot$">
+      <title>Successful Transactions within time range</title>
+      <table>
+        <title>ST Downstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "GMAC InterfaceID  : PA63"| eval Time = strftime(_time, "%Y-%d-%m %H:%M:%S") | fields - _time | rex field=_raw "Info Desc:(?&lt;File_Name&gt;.*)is"   | table Time File_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$snapshot$">
+      <title>Time Taken for Successful Transactions within selected time range</title>
+      <chart>
+        <title>ST Upstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" sourcetype="PA63_demo3"  "iWarranty_PA63 service started" OR "PA63:SFTP Process successful" | transaction startswith="iWarranty_PA63 service started" endswith="PA63:SFTP Process successful" |  timechart max(duration)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel rejects="$snapshot$">
+      <title>Time Taken for Successful Transactions within selected time range</title>
+      <chart>
+        <title>SOA</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "iWarranty_PA63 service started" OR "PA63:SFTP Process successful" | transaction startswith="iWarranty_PA63 service started" endswith="PA63:SFTP Process successful" |  timechart max(duration)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.axisTitleX.text">TRANSACTION</option>
+        <option name="charting.axisTitleY.text">Time Taken(sec)</option>
+      </chart>
+    </panel>
+    <panel rejects="$snapshot$">
+      <title>Time Taken for Successful Transactions within selected time range</title>
+      <chart>
+        <title>ST Downstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "iWarranty_PA63 service started" OR "PA63:SFTP Process successful" | transaction startswith="iWarranty_PA63 service started" endswith="PA63:SFTP Process successful" |  timechart max(duration)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel rejects="$snapshot$">
+      <title>Processing Time and No_Of_Records within time range</title>
+      <chart>
+        <title>ST Upstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "GMAC InterfaceID  : PA63"| eval Time = strftime(_time, "%d-%m-%y %H:%M") | fields - _time | rex field=_raw "Total Records processed: (?&lt;No_Of_Records&gt;.*) records processed in   (?&lt;Processing_Time&gt;.*) seconds"   | chart avg(Processing_Time) as Processing_Time(sec) avg(No_Of_Records) as No_Of_Records over Time</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisY2.enabled">undefined</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel rejects="$snapshot$">
+      <title>Processing Time and No_Of_Records within time range</title>
+      <chart>
+        <title>SOA</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local" sourcetype="PA63_demo3"  "GMAC InterfaceID  : PA63"| eval Time = strftime(_time, "%d-%m-%y %H:%M") | fields - _time | rex field=_raw "Total Records processed: (?&lt;No_Of_Records&gt;.*) records processed in   (?&lt;Processing_Time&gt;.*) seconds"   | chart avg(Processing_Time) as Processing_Time(sec) avg(No_Of_Records) as No_Of_Records over Time</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+    <panel rejects="$snapshot$">
+      <title>Processing Time and No_Of_Records within time range</title>
+      <chart>
+        <title>ST Downstream</title>
+        <search>
+          <query>host="swaroops-MacBook-Pro.local"  sourcetype="PA63_demo3" "GMAC InterfaceID  : PA63"| eval Time = strftime(_time, "%d-%m-%y %H:%M") | fields - _time | rex field=_raw "Total Records processed: (?&lt;No_Of_Records&gt;.*) records processed in   (?&lt;Processing_Time&gt;.*) seconds"   | chart avg(Processing_Time) as Processing_Time(sec) avg(No_Of_Records) as No_Of_Records over Time</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisY2.enabled">undefined</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>
